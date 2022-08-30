@@ -14,7 +14,11 @@
 ATriggerOfTempleGates::ATriggerOfTempleGates()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
+	PrimaryActorTick.bStartWithTickEnabled = true;	
+	PrimaryActorTick.bAllowTickOnDedicatedServer = true;
+	
+	OnActorBeginOverlap.AddDynamic(this, &ATriggerOfTempleGates::OnOverlapBegin);
+	OnActorEndOverlap.AddDynamic(this, &ATriggerOfTempleGates::OnOverlapEnd);
 
 }
 
@@ -22,11 +26,10 @@ ATriggerOfTempleGates::ATriggerOfTempleGates()
 void ATriggerOfTempleGates::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	DrawDebugBox(GetWorld(), GetActorLocation(), GetActorScale() * 100, FColor::Cyan, true, -1, 0, 5);
 
-	OnActorBeginOverlap.AddDynamic(this, &ATriggerOfTempleGates::OnOverlapBegin);
-	OnActorEndOverlap.AddDynamic(this, &ATriggerOfTempleGates::OnOverlapEnd);
-
+	
 
 
 
@@ -40,9 +43,7 @@ void ATriggerOfTempleGates::OnOverlapBegin(class AActor* OverlappedActor, class 
 		if (OtherActor != this)
 			isInTrigger = true;
 	}
-	UE_LOG(LogTemp, Display, TEXT("hASDASD"));
-
-
+	
 
 }
 
@@ -53,8 +54,8 @@ void ATriggerOfTempleGates::OnOverlapEnd(class AActor* OverlappedActor, class AA
 	{
 		if (OtherActor != this)
 			isInTrigger = false;
+	
 	}
-	UE_LOG(LogTemp, Display, TEXT("hASDASD"));
 }
 
 
@@ -69,13 +70,13 @@ void ATriggerOfTempleGates::Tick(float DeltaTime)
 	if (isInTrigger)
 
 	{
-		gate->SetActorLocation(gate->GetActorLocation() + speedVector * DeltaTime);
-		button->SetActorLocation(button->GetActorLocation() + speedVector * DeltaTime);
+		gate->SetActorLocation(gate->GetActorLocation() + gateSpeed * DeltaTime);
+		button->SetActorLocation(button->GetActorLocation() + buttonSpeed * DeltaTime);
 	}
 	else
 	{
-		gate->SetActorLocation(gate->GetActorLocation() - speedVector * DeltaTime);
-		button->SetActorLocation(button->GetActorLocation() - speedVector * DeltaTime);
+		gate->SetActorLocation(gate->GetActorLocation() - gateSpeed * DeltaTime);
+		button->SetActorLocation(button->GetActorLocation() - buttonSpeed * DeltaTime);
 	}
 
 

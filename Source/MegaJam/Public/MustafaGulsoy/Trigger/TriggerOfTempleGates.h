@@ -38,8 +38,11 @@ public:
 	bool isInTrigger = false;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger")
-		FVector speedVector;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger/ButtonSpeed")
+		FVector gateSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger/ButtonSpeed")
+		FVector buttonSpeed;
 
 	UPROPERTY()
 		FVector buttomLocation;
