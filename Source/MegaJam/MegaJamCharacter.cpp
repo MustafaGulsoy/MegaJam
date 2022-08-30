@@ -19,6 +19,7 @@ AMegaJamCharacter::AMegaJamCharacter()
 	// set our turn rate for input
 	TurnRateGamepad = 50.f;
 
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -51,6 +52,38 @@ AMegaJamCharacter::AMegaJamCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
+// Called every frame
+void AMegaJamCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (grabbedObject == nullptr)
+	{
+
+	}
+	else
+	{
+		//staticMesh->AddForce(FVector(1, 2, 3));
+		//
+		//
+		
+		staticMesh->SetWorldLocation(FMath::VInterpTo
+		(
+			grabbedObject->GetActorLocation(),
+			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation() +
+			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector() * grabDistance +FVector(0,0,100),
+			DeltaTime,
+			3.f
+		));
+		UE_LOG(LogTemp, Display, TEXT("%s"), *((GetActorLocation() - GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation()) * -2 +
+			GetActorLocation()).ToString());
+	
+	
+	
+	}
+
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -58,8 +91,12 @@ void AMegaJamCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
+
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
+	PlayerInputComponent->BindAction("Grab", IE_Pressed, this, &AMegaJamCharacter::Grab);
+
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &AMegaJamCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &AMegaJamCharacter::MoveRight);
@@ -71,6 +108,8 @@ void AMegaJamCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	PlayerInputComponent->BindAxis("Turn Right / Left Gamepad", this, &AMegaJamCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Look Up / Down Gamepad", this, &AMegaJamCharacter::LookUpAtRate);
+
+	PlayerInputComponent->BindAxis("Grab Distance", this, &AMegaJamCharacter::SetGrabDistance);
 
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AMegaJamCharacter::TouchStarted);
@@ -115,15 +154,75 @@ void AMegaJamCharacter::MoveForward(float Value)
 
 void AMegaJamCharacter::MoveRight(float Value)
 {
-	if ( (Controller != nullptr) && (Value != 0.0f) )
+	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
+
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
+}
+
+
+void AMegaJamCharacter::Grab()
+{
+
+	if (grabbedObject == nullptr)
+	{
+		AMegaJamCharacter::GrabItem();
+	}
+	else
+	{
+		AMegaJamCharacter::ReleaseItem();
+
+	}
+}
+
+void AMegaJamCharacter::GrabItem() {
+
+	UE_LOG(LogTemp, Display, TEXT("Anything can happen"));
+
+	if (grabbedObject == nullptr)
+	{
+		FHitResult hit;
+		FVector ForwardVector = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector();
+		FVector start = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetTransform().GetLocation() + FVector(0, 0, 80);
+		FVector end = ((ForwardVector * 1000.f) + start);
+		DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 10, 0, 1);
+
+		FCollisionQueryParams collisionParams;
+
+		isHit = GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, collisionParams);
+
+		if (isHit)
+		{
+			if (hit.GetActor() != GetOwner())
+			{
+				grabbedObject = hit.GetActor();
+				UE_LOG(LogTemp, Display, TEXT("%s"), *grabbedObject->GetName());
+				staticMesh = Cast<UStaticMeshComponent>(hit.GetActor()->GetRootComponent());
+				staticMesh->SetEnableGravity(false);
+			}
+		}
+	}
+}
+void AMegaJamCharacter::ReleaseItem()
+{
+	staticMesh->SetEnableGravity(true);
+	grabbedObject = nullptr;
+	staticMesh = nullptr;
+
+	UE_LOG(LogTemp, Display, TEXT("Birakti"));
+
+}
+
+
+void AMegaJamCharacter::SetGrabDistance(float value) 
+{
+	grabDistance += value;
+
 }
