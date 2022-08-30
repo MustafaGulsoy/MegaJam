@@ -8,7 +8,6 @@ UGrab::UGrab()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
 }
@@ -28,42 +27,41 @@ void UGrab::BeginPlay()
 void UGrab::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	UGrab::GrabItem();
 
-	if (grabbedObject != nullptr)
-		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector();
-
+	
 	// ...
 }
 
 
 void UGrab::GrabItem() {
 
-	if (grabbedObject == nullptr)
-	{
-		FHitResult hit;
-		FVector ForwardVector = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector();
-		FVector start = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetTransform().GetLocation() + FVector(0, 0, 80); ;
-		FVector end = ((ForwardVector * 1000.f) + start);
+	//UE_LOG(LogTemp, Display, TEXT("Anything can happen"));
 
-		DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 1, 0, 1);
-		FCollisionQueryParams collisionParams;
+	//if (grabbedObject == nullptr)
+	//{
+	//	FHitResult hit;
+	//	FVector ForwardVector = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector();
+	//	FVector start = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetTransform().GetLocation() + FVector(0, 0, 80); ;
+	//	FVector end = ((ForwardVector * 1000.f) + start);
 
-		isHit = GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, collisionParams);
+	//	DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 1, 0, 1);
+	//	FCollisionQueryParams collisionParams;
 
-		if (isHit)
+	//	isHit = GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, collisionParams);
 
-		{
-			if (hit.GetActor() != GetOwner())
-			{
-				grabbedObject = hit.GetActor();
-				UE_LOG(LogTemp, Display, TEXT("%s"), *grabbedObject->GetName());
-				grabbedObject->SetActorLocation(FVector(1, 2, 3));
-				UE_LOG(LogTemp, Display, TEXT("Aldi"));
+	//	if (isHit)
 
-			}
-		}
-	}
+	//	{
+	//		if (hit.GetActor() != GetOwner())
+	//		{
+	//			grabbedObject = hit.GetActor();
+	//			UE_LOG(LogTemp, Display, TEXT("%s"), *grabbedObject->GetName());
+	//			grabbedObject->SetActorLocation(FVector(1, 2, 3));
+	//			UE_LOG(LogTemp, Display, TEXT("Aldi"));
+
+	//		}
+	//	}
+	//}
 
 
 }
@@ -71,8 +69,8 @@ void UGrab::GrabItem() {
 
 void UGrab::ReleaseItem()
 {
-	grabbedObject = nullptr;
-	UE_LOG(LogTemp, Display, TEXT("Birakti"));
+	//grabbedObject = nullptr;
+	//UE_LOG(LogTemp, Display, TEXT("Birakti"));
 
 }
 
