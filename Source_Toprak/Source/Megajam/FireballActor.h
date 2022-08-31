@@ -15,8 +15,8 @@ UCLASS()
 class MEGAJAM_API AFireballActor : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AFireballActor();
 
@@ -24,7 +24,7 @@ protected:
 	// Called when the game starts or when spawnedS
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -51,7 +51,6 @@ public:
 	void HitTheGround();
 
 	bool ShouldComeBack();
-protected:
 
 	FVector TargetLoc;
 
@@ -63,4 +62,5 @@ protected:
 
 	UStaticMeshComponent* MeshSphere;
 
+	AEye* AttachedEye;
 };

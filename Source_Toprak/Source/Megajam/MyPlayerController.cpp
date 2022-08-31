@@ -13,7 +13,7 @@ void AMyPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	possessedPawn = Cast<AMegajamCharacter>(GetPawn());
-	
+
 	TArray<AActor*> ChildActors;
 	possessedPawn->GetAttachedActors(ChildActors);
 	FireballActor = Cast<AFireballActor>(ChildActors[0]);
@@ -34,12 +34,9 @@ void AMyPlayerController::SetupInputComponent()
 	InputComponent->BindAxis("Move Forward / Backward", this, &AMyPlayerController::CallMoveForward);
 	InputComponent->BindAxis("Move Right / Left", this, &AMyPlayerController::CallMoveRight);
 
-	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
-	// "turn" handles devices that provide an absolute delta, such as a mouse.
-	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	InputComponent->BindAxis("Turn Right / Left Mouse", this, &AMyPlayerController::CallAddControllerYawInput);
 	InputComponent->BindAxis("Look Up / Down Mouse", this, &AMyPlayerController::CallAddControllerPitchInput);
-	
+
 }
 
 void AMyPlayerController::Tick(float DeltaTime)

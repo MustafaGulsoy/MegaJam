@@ -11,8 +11,8 @@ UCLASS()
 class MEGAJAM_API AEye : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AEye();
 
@@ -20,11 +20,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+	USpringArmComponent* Socket;
+
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	USpringArmComponent* Socket;
-
 	USpringArmComponent* GetSocket();
+
+	bool IsSocketFilled;
+
 };

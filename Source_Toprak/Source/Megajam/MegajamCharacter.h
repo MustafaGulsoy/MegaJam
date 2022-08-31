@@ -6,18 +6,18 @@
 #include "GameFramework/Character.h"
 #include "MegajamCharacter.generated.h"
 
-UCLASS(config=Game)
+UCLASS(config = Game)
 class AMegajamCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	/** Camera boom positioning the camera behind the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
+		/** Camera boom positioning the camera behind the character */
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class USpringArmComponent* CameraBoom;
 
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* FollowCamera;
+		class UCameraComponent* FollowCamera;
 
 public:
 	AMegajamCharacter();
@@ -31,11 +31,15 @@ public:
 	UPROPERTY(EditAnywhere, Category = Dash)
 		float DashCooldown;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player)
+		float Health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player)
+		float MaxHealth;
+
 	float DashStartTime;
 
 	float IsDashed;
-
-	FVector DashTargetLoc;
 
 	void MoveForward(float Value);
 
@@ -46,7 +50,5 @@ public:
 public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
-
 };
 

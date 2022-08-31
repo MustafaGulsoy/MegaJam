@@ -21,7 +21,6 @@ void AFireballActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	
 	if (CurrentSocket != DefaultSocket && !ShouldComeBack())
 	{
 		SetActorLocation
@@ -87,6 +86,12 @@ void AFireballActor::Fire()
 	}
 	else
 	{
+		if (AttachedEye)
+		{
+			AttachedEye->IsSocketFilled = false;
+			AttachedEye = nullptr;
+
+		}
 		CurrentSocket = DefaultSocket;
 		AttachToComponent(
 			CurrentSocket,
@@ -101,26 +106,29 @@ void AFireballActor::RaycastFromCamera()
 	TArray<FHitResult> hits;
 	FVector forward = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector();
 	FVector start = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetTransform().GetLocation();
-	FVector end = (forward * FireballRange) + start ;
+	FVector end = (forward * FireballRange) + start;
 	FCollisionQueryParams* col = new FCollisionQueryParams();
 	col->AddIgnoredActor(GetParentActor());
 
-	//DrawDebugLine(GetWorld(), start, end, FColor::Orange, true);
 	if (GetWorld()->LineTraceMultiByChannel(hits, start, end, ECC_Camera, *col))
 	{
 		for (FHitResult hit : hits)
 		{
 			AEye* Eye = Cast<AEye>(hit.GetActor());
-			if (Eye)
+			if (Eye && !Eye->IsSocketFilled)
 			{
+				UE_LOG(LogTemp, Log, TEXT("Hi, i'm %s"), *Eye->GetName());
+
 				CurrentSocket = Eye->GetSocket();
+				AttachedEye = Eye;
+				Eye->IsSocketFilled = true;
+
 				AttachToComponent(
 					CurrentSocket,
 					FAttachmentTransformRules::KeepWorldTransform
 				);
-				MeshSphere->SetSimulatePhysics(false);
 
-				break;
+				MeshSphere->SetSimulatePhysics(false);
 			}
 		}
 	}
@@ -144,6 +152,11 @@ bool AFireballActor::ShouldComeBack()
 {
 	if (FVector::Dist(GetParentActor()->GetActorLocation(), GetActorLocation()) > 1500)
 	{
+		if (AttachedEye)
+		{
+			AttachedEye->IsSocketFilled = false;
+			AttachedEye = nullptr;
+		}
 		CurrentSocket = DefaultSocket;
 		IsAttacking = false;
 		return true;
