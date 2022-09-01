@@ -2,6 +2,9 @@
 
 
 #include "FireballActor.h"
+#include "Eye.h"
+
+AEye* AttachedEye;
 
 // Sets default values
 AFireballActor::AFireballActor()
@@ -14,9 +17,22 @@ AFireballActor::AFireballActor()
 void AFireballActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	TArray<USpringArmComponent*> SpringArms;
+	GetParentActor()->GetComponents<USpringArmComponent>(SpringArms);
+	if (BallType == BallType::Fire)
+	{
+		DefaultSocket = SpringArms[2];
+	} 
+	else if (BallType == BallType::Ice)
+	{
+		DefaultSocket = SpringArms[3];
+	}
+
+	CurrentSocket = DefaultSocket;
+	MeshSphere = FindComponentByClass<UStaticMeshComponent>();
 }
 
-// Called every frame
 void AFireballActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -89,6 +105,7 @@ void AFireballActor::Fire()
 		if (AttachedEye)
 		{
 			AttachedEye->IsSocketFilled = false;
+			AttachedEye->SetBall(nullptr);
 			AttachedEye = nullptr;
 
 		}
@@ -108,7 +125,7 @@ void AFireballActor::RaycastFromCamera()
 	FVector start = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetTransform().GetLocation();
 	FVector end = (forward * FireballRange) + start;
 	FCollisionQueryParams* col = new FCollisionQueryParams();
-	col->AddIgnoredActor(GetParentActor());
+	col->AddIgnoredActor(this);
 
 	if (GetWorld()->LineTraceMultiByChannel(hits, start, end, ECC_Camera, *col))
 	{
@@ -117,11 +134,10 @@ void AFireballActor::RaycastFromCamera()
 			AEye* Eye = Cast<AEye>(hit.GetActor());
 			if (Eye && !Eye->IsSocketFilled)
 			{
-				UE_LOG(LogTemp, Log, TEXT("Hi, i'm %s"), *Eye->GetName());
-
 				CurrentSocket = Eye->GetSocket();
 				AttachedEye = Eye;
 				Eye->IsSocketFilled = true;
+				Eye->SetBall(this);
 
 				AttachToComponent(
 					CurrentSocket,
@@ -129,6 +145,11 @@ void AFireballActor::RaycastFromCamera()
 				);
 
 				MeshSphere->SetSimulatePhysics(false);
+
+				if (Eye->BallType == BallType)
+				{
+					UE_LOG(LogTemp, Log, TEXT("Same type"));
+				}
 			}
 		}
 	}
@@ -155,6 +176,7 @@ bool AFireballActor::ShouldComeBack()
 		if (AttachedEye)
 		{
 			AttachedEye->IsSocketFilled = false;
+			AttachedEye->SetBall(nullptr);
 			AttachedEye = nullptr;
 		}
 		CurrentSocket = DefaultSocket;

@@ -14,6 +14,7 @@
 
 AMegajamCharacter::AMegajamCharacter()
 {
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -46,11 +47,9 @@ AMegajamCharacter::AMegajamCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-
 	IsDashed = false;
 	DashStartTime = 0;
-	Health = 100;
-	MaxHealth = 100;
+	CollectedCrystalNum = 0;
 }
 
 void AMegajamCharacter::Tick(float DeltaTime)
@@ -68,6 +67,35 @@ void AMegajamCharacter::Tick(float DeltaTime)
 	{
 		IsDashed = false;
 	}
+
+	if (GrabbedObject)
+	{
+		FQuat x = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorQuat();
+		x.Y = 0;
+		x.X = 0;
+		SetActorRotation(x);
+
+		GrabbedObject->GetRootComponent()->SetWorldLocationAndRotation
+		(
+			FMath::VInterpTo
+			(
+				GrabbedObject->GetActorLocation(),
+				GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector() * GrabSocket + GetActorLocation(),
+				DeltaTime,
+				5.f
+			),
+			FMath::RInterpTo
+			(
+				GrabbedObject->GetActorRotation(),
+				GetActorRotation(),
+				DeltaTime,
+				5.f
+			),
+			true
+		);
+	}
+
+	InteractRaycast();
 }
 
 void AMegajamCharacter::MoveForward(float Value)
@@ -107,5 +135,109 @@ void AMegajamCharacter::Dash()
 		LaunchCharacter(GetActorForwardVector() * DashForce, true, true);
 		DashStartTime = 0;
 		IsDashed = true;
+	}
+}
+
+void AMegajamCharacter::Grab()
+{
+	FHitResult hit;
+	FVector forward = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector();
+	FVector start = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetTransform().GetLocation();
+	FVector end = forward * 2000.f + start;
+	FCollisionQueryParams* col = new FCollisionQueryParams();
+	col->AddIgnoredActor(this);
+
+	if (GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_WorldDynamic, *col))
+	{
+		if (hit.GetActor()->IsRootComponentMovable())
+		{
+			GrabbedObject = hit.GetActor();
+			GrabbedObject->FindComponentByClass<UStaticMeshComponent>()->SetSimulatePhysics(false);
+		}
+	}
+}
+
+void AMegajamCharacter::GrabEnd()
+{
+	if (GrabbedObject)
+	{
+		GrabbedObject->FindComponentByClass<UStaticMeshComponent>()->SetSimulatePhysics(true);
+		GrabbedObject = nullptr;
+	}
+}
+
+void AMegajamCharacter::AdjustDistanceGrabbedObject(float value)
+{
+	GrabSocket += 30 * value;
+}
+
+void AMegajamCharacter::InteractRaycast()
+{
+	FHitResult hit;
+	FVector forward = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector();
+	FVector start = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetTransform().GetLocation();
+	FVector end = forward * 500.f + start;
+	FCollisionQueryParams* col = new FCollisionQueryParams();
+	col->AddIgnoredActor(this);
+
+	bInteractObject = GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, *col);
+	
+	if (bInteractObject)
+	{
+		InteractableObj = Cast<AInteractable>(hit.GetActor());
+		// UI Press button
+	}
+}
+
+void AMegajamCharacter::Interact()
+{
+	if (bInteractObject)
+	{
+		ACrystal* Crystal = Cast<ACrystal>(InteractableObj);
+
+		if (Crystal)
+		{
+			Crystal->Interact();
+		}
+
+		else
+		{
+			AChest* Chest = Cast<AChest>(InteractableObj);
+
+			if (Chest)
+			{
+				Chest->Interact();
+			}
+
+			else
+			{
+				ADoor* Door = Cast<ADoor>(InteractableObj);
+
+				if (Door)
+				{
+					Door->Interact();
+				}
+
+				else
+				{
+					ACrystalPlace* CrystalPlace = Cast<ACrystalPlace>(InteractableObj);
+
+					if (CrystalPlace)
+					{
+						CrystalPlace->Interact();
+					}
+
+					else
+					{
+						AShrine* Shrine = Cast<AShrine>(InteractableObj);
+
+						if (Shrine)
+						{
+							Shrine->Interact();
+						}
+					}
+				}
+			}
+		}
 	}
 }

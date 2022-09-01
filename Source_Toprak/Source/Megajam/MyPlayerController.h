@@ -37,4 +37,8 @@ private:
 	void CallIceballFire();
 	void CallDash();
 	void CallHitTheGround();
+	void CallGrab();
+	void CallGrabEnd();
+	void CallAdjustDistanceGrabbedObject(float value);
+	void CallPlayMontage();
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "FireballActor.h"
 #include "Runtime/Engine/Classes/GameFramework/SpringArmComponent.h"
 #include "Eye.generated.h"
 
@@ -13,21 +14,25 @@ class MEGAJAM_API AEye : public AActor
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	AEye();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	USpringArmComponent* Socket;
 
+	AFireballActor* Ball;
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Fireball)
+		TEnumAsByte<BallType> BallType;
 
 	USpringArmComponent* GetSocket();
 
 	bool IsSocketFilled;
+
+	AFireballActor* GetBall();
+
+	void SetBall(AFireballActor* ball);
 
 };

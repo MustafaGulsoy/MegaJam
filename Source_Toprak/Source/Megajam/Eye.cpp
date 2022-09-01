@@ -6,9 +6,6 @@
 // Sets default values
 AEye::AEye()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	IsSocketFilled = false;
 }
 
@@ -22,12 +19,17 @@ void AEye::BeginPlay()
 	
 }
 
-void AEye::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 USpringArmComponent* AEye::GetSocket()
 {
 	return Socket;
+}
+
+void AEye::SetBall(AFireballActor* ball)
+{
+	Ball = ball;
+}
+
+AFireballActor* AEye::GetBall()
+{
+	return Ball;
 }

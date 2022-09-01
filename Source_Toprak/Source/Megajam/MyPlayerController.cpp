@@ -30,13 +30,16 @@ void AMyPlayerController::SetupInputComponent()
 	InputComponent->BindAction("IceballFire", IE_Pressed, this, &AMyPlayerController::CallIceballFire);
 	InputComponent->BindAction("Dash", IE_Pressed, this, &AMyPlayerController::CallDash);
 	InputComponent->BindAction("HitTheGround", IE_Pressed, this, &AMyPlayerController::CallHitTheGround);
+	InputComponent->BindAction("Grab", IE_Pressed, this, &AMyPlayerController::CallGrab);
+	InputComponent->BindAction("Grab", IE_Released, this, &AMyPlayerController::CallGrabEnd);
+	InputComponent->BindAction("Interact", IE_Pressed, this, &AMyPlayerController::CallInteract);
 
 	InputComponent->BindAxis("Move Forward / Backward", this, &AMyPlayerController::CallMoveForward);
 	InputComponent->BindAxis("Move Right / Left", this, &AMyPlayerController::CallMoveRight);
 
 	InputComponent->BindAxis("Turn Right / Left Mouse", this, &AMyPlayerController::CallAddControllerYawInput);
 	InputComponent->BindAxis("Look Up / Down Mouse", this, &AMyPlayerController::CallAddControllerPitchInput);
-
+	InputComponent->BindAxis("Adjust Grab Dist", this, &AMyPlayerController::CallAdjustDistanceGrabbedObject);
 }
 
 void AMyPlayerController::Tick(float DeltaTime)
@@ -127,5 +130,37 @@ void AMyPlayerController::CallHitTheGround()
 	{
 		IceballActor->HitTheGround();
 		FireballActor->HitTheGround();
+	}
+}
+
+void AMyPlayerController::CallGrab()
+{
+	if (possessedPawn)
+	{
+		possessedPawn->Grab();
+	}
+}
+
+void AMyPlayerController::CallGrabEnd()
+{
+	if (possessedPawn)
+	{
+		possessedPawn->GrabEnd();
+	}
+}
+
+void AMyPlayerController::CallAdjustDistanceGrabbedObject(float value)
+{
+	if (possessedPawn)
+	{
+		possessedPawn->AdjustDistanceGrabbedObject(value);
+	}
+}
+
+void AMyPlayerController::CallInteract()
+{
+	if (possessedPawn)
+	{
+		possessedPawn->AdjustDistanceGrabbedObject();
 	}
 }
